@@ -2,8 +2,8 @@ import json
 import requests
 from datetime import date
 from langchain_core.tools import tool as langchain_tool
-
-NOTION_TOKEN = os.getenv("NOTION_KEY")
+import os
+NOTION_TOKEN = os.getenv("NOTION_TOKEN")
 DATABASE_ID = os.getenv("DATABASE_ID")
 IMAGE_DUMP_PAGE_ID = os.getenv("IMAGE_DUMP_PAGE_ID")
 BASE_URL = "https://api.notion.com/v1"

@@ -1,4 +1,7 @@
 import os
+from dotenv import load_dotenv
+load_dotenv()
+
 import base64
 import logging
 from telegram import Update
@@ -10,8 +13,6 @@ from telegram.ext import (
     filters,
 )
 from llm import run_agent
-from dotenv import load_dotenv
-load_dotenv()
 
 # ── Configuration ──────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")

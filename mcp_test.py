@@ -4,6 +4,7 @@ from langchain_groq import ChatGroq
 from langgraph.prebuilt import create_react_agent
 from langchain_core.messages import HumanMessage
 from dotenv import load_dotenv
+import os
 load_dotenv()
 
 NOTION_KEY = os.getenv("NOTION_TOKEN")
