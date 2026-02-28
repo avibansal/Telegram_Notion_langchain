@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  telegram-bot:
+    build: .
+    container_name: telegram_notion_bot_container
+    restart: always # Automatically restart on crash or server reboot
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs # Example volume if you implement a logs folder

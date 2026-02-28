@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+
+venv/
+.venv/
+env/
+
+.git/
+.gitignore
+
+# You can omit .env if you don't want it built into the image
+# Often it's passed at runtime, so we can ignore it during build
+.env
+
+README.md
+diagram.png
