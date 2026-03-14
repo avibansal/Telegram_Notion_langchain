@@ -12,7 +12,7 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
-from llm import run_agent
+from core.llm import run_agent
 
 # ── Configuration ──────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -75,7 +75,7 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
         image_url = file.file_path
 
         # Save directly to Notion (no LLM needed)
-        from tool import dump_image
+        from core.langchain_tool import dump_image
         result = dump_image.invoke({"image_url": image_url, "caption": caption})
         response = f"Saved to Notion!\n{caption}" if caption else "Image saved to Notion!"
     except Exception as e:

@@ -1,8 +1,9 @@
 import json
 import requests
 from datetime import date
-from langchain_core.tools import tool as langchain_tool
 import os
+from dotenv import load_dotenv
+load_dotenv()
 NOTION_TOKEN = os.getenv("NOTION_TOKEN")
 DATABASE_ID = os.getenv("DATABASE_ID")
 IMAGE_DUMP_PAGE_ID = os.getenv("IMAGE_DUMP_PAGE_ID")
@@ -14,14 +15,7 @@ HEADERS = {
     "Notion-Version": "2022-06-28"
 }
 
-@langchain_tool
-def get_tasks(date_filter=None, status=None, keyword=None):
-    """
-    Query tasks from the database.
-    - date_filter: exact date string (YYYY-MM-DD), or "today"
-    - status: filter by status name (e.g. "Done", "Not Started", "In Progress")
-    - keyword: search tasks whose title contains this keyword
-    """
+def get_tasks_logic(date_filter=None, status=None, keyword=None):
     url = f"{BASE_URL}/databases/{DATABASE_ID}/query"
 
     filters = []
@@ -89,9 +83,7 @@ def get_tasks(date_filter=None, status=None, keyword=None):
 
     return json.dumps(tasks) if tasks else "No tasks found."
 
-@langchain_tool
-def add_task(title, date_str, status="Not Started"):
-    """Create a new task in the database."""
+def add_task_logic(title, date_str, status="Not Started"):
     url = f"{BASE_URL}/pages"
 
     payload = {
@@ -115,9 +107,7 @@ def add_task(title, date_str, status="Not Started"):
 
     return response.json()["id"]
 
-@langchain_tool
-def update_task(page_id, title=None, date_str=None, status=None):
-    """Update any combination of title, date, or status for a task."""
+def update_task_logic(page_id, title=None, date_str=None, status=None):
     url = f"{BASE_URL}/pages/{page_id}"
 
     properties = {}
@@ -144,10 +134,8 @@ def update_task(page_id, title=None, date_str=None, status=None):
 
     return "Updated successfully"
 
-@langchain_tool
-def get_task_summary():
-    """Returns a count of tasks grouped by status."""
-    result = get_tasks.invoke({})
+def get_task_summary_logic():
+    result = get_tasks_logic()
     all_tasks = json.loads(result) if isinstance(result, str) and result != "No tasks found." else []
     summary = {}
     for task in all_tasks:
@@ -155,9 +143,7 @@ def get_task_summary():
         summary[s] = summary.get(s, 0) + 1
     return json.dumps(summary) if summary else "No tasks found."
 
-@langchain_tool
-def dump_image(image_url: str, caption: str = "") -> str:
-    """Save an image to the Notion Images Dump database. Requires image_url and optional caption."""
+def dump_image_logic(image_url: str, caption: str = "") -> str:
     url = f"{BASE_URL}/pages"
     today = date.today().isoformat()
 
