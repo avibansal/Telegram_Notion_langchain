@@ -13,6 +13,7 @@ from telegram.ext import (
     filters,
 )
 from core.llm import run_agent
+from utils.chat_logger import log_chat
 
 # ── Configuration ──────────────────────────────────────────────
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -54,6 +55,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         logger.error("Agent error: %s", e)
         response = f"⚠️ Something went wrong:\n`{e}`"
+
+    # Log the Q&A to chat history
+    log_chat(update.effective_user.first_name, user_text, response)
 
     try:
         await update.message.reply_text(response, parse_mode="Markdown")
