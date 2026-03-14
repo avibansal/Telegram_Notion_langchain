@@ -1418,6 +1418,7 @@ dependencies = [
     { name = "mcp", extra = ["cli"] },
     { name = "notion-client" },
     { name = "pillow" },
+    { name = "python-dotenv" },
     { name = "python-telegram-bot" },
     { name = "requests" },
 ]
@@ -1431,6 +1432,7 @@ requires-dist = [
     { name = "mcp", extras = ["cli"], specifier = ">=1.26.0" },
     { name = "notion-client", specifier = ">=3.0.0" },
     { name = "pillow", specifier = ">=12.1.1" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
     { name = "python-telegram-bot", specifier = ">=22.6" },
     { name = "requests", specifier = ">=2.32.5" },
 ]
