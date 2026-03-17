@@ -12,7 +12,7 @@ from telegram.ext import (
     ContextTypes,
     filters,
 )
-from core.llm import run_agent
+from core.llm import run_agent, transcribe_audio
 from utils.chat_logger import log_chat
 
 # ── Configuration ──────────────────────────────────────────────
@@ -37,7 +37,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
         "• _Add a task called 'Meeting' for 2026-02-20_\n"
         "• _Update the 'Meeting' task to Done_\n"
         "• _Give me a task summary_\n"
-        "• Send a photo and I'll analyze it!\n\n"
+        "• Send a photo and I'll analyze it!\n"
+        "• Send a voice message and I'll understand it!\n\n"
         "Just type a message and I'll handle it! 🚀"
     )
     await update.message.reply_text(welcome, parse_mode="Markdown")
@@ -89,6 +90,41 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(response)
 
 
+async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    """Handle voice/audio messages — transcribe and process as text."""
+    logger.info("User %s sent a voice message", update.effective_user.first_name)
+
+    await update.message.chat.send_action("typing")
+
+    try:
+        # Get the voice or audio file
+        voice = update.message.voice or update.message.audio
+        file = await context.bot.get_file(voice.file_id)
+        audio_data = await file.download_as_bytearray()
+
+        # Transcribe audio to text
+        user_text = transcribe_audio(bytes(audio_data))
+        logger.info("Transcribed: %s", user_text)
+        
+        if not user_text:
+            await update.message.reply_text("I couldn't understand the audio. Please try again.")
+            return
+        # Process transcribed text through the agent
+        response = run_agent(user_text)
+
+        # Log the Q&A
+        log_chat(update.effective_user.first_name, user_text, response)
+
+    except Exception as e:
+        logger.error("Agent error (voice): %s", e)
+        response = f"⚠️ Something went wrong:\n`{e}`"
+
+    try:
+        await update.message.reply_text(response, parse_mode="Markdown")
+    except Exception:
+        await update.message.reply_text(response)
+
+
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
     """Log errors."""
     logger.error("Update %s caused error: %s", update, context.error)
@@ -102,9 +138,10 @@ def main():
 
     app = ApplicationBuilder().token(TELEGRAM_BOT_TOKEN).build()
 
-    app.add_handler(CommandHandler("start", start))
+    app.add_handler(CommandHandler("hi", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     app.add_handler(MessageHandler(filters.PHOTO, handle_photo))
+    app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, handle_voice))
     app.add_error_handler(error_handler)
 
     print("🤖 Bot is running... Press Ctrl+C to stop.")

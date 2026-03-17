@@ -15,4 +15,6 @@ dependencies = [
     "pillow>=12.1.1",
     "python-telegram-bot>=22.6",
     "requests>=2.32.5",
+    "grok>=6.2",
+    "sarvamai>=0.1.27",
 ]

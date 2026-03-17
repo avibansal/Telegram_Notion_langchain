@@ -1,15 +1,52 @@
 import json
 import base64
+import io
 from datetime import datetime
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain.agents import create_agent
 from core.langchain_tool import get_tasks, add_task, update_task, get_task_summary, dump_image
+from groq import Groq
+
 import os
 from dotenv import load_dotenv
+from sarvamai import SarvamAI
+from sarvamai.core.api_error import ApiError
+
 load_dotenv()
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+SARVAM_API_KEY = os.getenv("SARVAM_API_KEY")
+
+client = SarvamAI(
+    api_subscription_key=SARVAM_API_KEY,
+)
+
+def transcribe_audio(audio_bytes: bytes, filename: str = "audio.ogg") -> str:
+    """Transcribe audio bytes to text using Groq Whisper API."""
+    audio_file = io.BytesIO(audio_bytes)
+    audio_file.name = filename
+
+    try:
+        transcription = client.speech_to_text.transcribe(
+            file=audio_file,
+            model="saaras:v3",
+            mode="transcribe"  # or "translate", "verbatim", "translit", "codemix"
+        )
+
+    except ApiError as e:
+        if e.status_code == 400:
+            return f"Bad request: {e.body}"
+        elif e.status_code == 403:
+            return "Invalid API key. Check your credentials."
+        elif e.status_code == 429:
+            return "Rate limit exceeded. Wait and retry."
+        elif e.status_code == 503:
+            return "Service overloaded. Retry with backoff."
+        else:
+            return f"Error {e.status_code}: {e.body}"
+
+    return transcription.transcript
 
 
 def get_system_prompt():
