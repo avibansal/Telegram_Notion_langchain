@@ -76,8 +76,9 @@ This project is a Telegram bot that integrates with Notion using LangChain and G
     python telegram_bot.py
     ```
 
-2.  Open Telegram and find your bot.
 
+2.  Open Telegram and find your bot.
+ 
 3.  Send `/start` to see the welcome message.
 
 4.  Interact with the bot using natural language:
